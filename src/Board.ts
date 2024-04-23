@@ -1,10 +1,16 @@
+'use strict';
+
 type BoardRowStatus = 'notbomb'[] | 'bomb'[];
 
 class Board {
     #sideLength = 0;
     #numBombs = 0;
+
     #boardStatus: BoardRowStatus[] = [];
     #bombCoordinates: number[][] = [];
+
+    #flaggedBombs: number = 0;
+    #errorMessage = '';
 
     constructor(sideLength: number, numBombs: number) {
         this.#sideLength = sideLength;
@@ -19,7 +25,7 @@ class Board {
     }
 
     // returns an array with multiple subarrays, each subarray being the (x, y) coordinate of a bomb
-    #determineBombCoordinates() {
+    #determineBombCoordinates(): number[][] {
         let bombCoordinates: number[][] = [];
         for (let i = 0; i < this.#numBombs; i++) {
             let x = -1;
@@ -33,9 +39,9 @@ class Board {
         return bombCoordinates;
     }
 
-    // does not return anything; creates an array of arrays, where each array is a row
+    // creates an array of arrays, where each array is a row
     // at each (i, j) is a word that describes the cell's status
-    #initializeBoardStatus() {
+    #initializeBoardStatus(): void {
         for (let i = 0; i < this.#sideLength; i++) {
             let row: BoardRowStatus = [];
             for (let j = 0; j < this.#sideLength; j++) {
@@ -49,11 +55,9 @@ class Board {
         }
     }
 
-    // returns an array of cells (not coord pairs) surrounding the cell with the current coord pair, as long as each cell is within bounds and has not yet been checked
-    #findAdjacentCells(x: number, y: number) {
+    // returns cells surrounding the current coods, as long as each cell is within bounds and has not yet been checked
+    #findAdjacentCells(x: number, y: number): HTMLButtonElement[] {
         let adjacentCells: HTMLButtonElement[] = [];
-        x = Number(x);
-        y = Number(y);
         for (let i = (x - 1); i <= (x + 1); i++) {
             // x outside of board
             if (i < 0 || i > this.#sideLength - 1) continue;
@@ -64,17 +68,18 @@ class Board {
                 if (i == x && j == y) continue;
 
                 const cell: HTMLButtonElement | null = document.querySelector(`[data-x = '${i}'][data-y = '${j}']`);
+
                 // cell has already been checked
-                if (cell?.getAttribute('data-checked') === 'true') continue;
-                // cell is unchecked and within board
-                if (cell) adjacentCells.push(cell);
+                if (cell?.getAttribute('data-status') === 'unchecked') adjacentCells.push(cell);
             }
         }
         return adjacentCells;
     }
 
-    #checkAdjacentCells(x, y) {
-        const currentCell: HTMLButtonElement | null = document.querySelector(`[data-x = '${x}'][data-y = '${y}']`);
+    #checkAdjacentCells(x: number, y: number): void {
+        const currentCell: HTMLButtonElement = document.querySelector(`[data-x = '${x}'][data-y = '${y}']`)!;
+        currentCell.setAttribute('data-status', 'checked');
+
         const adjacentCells = this.#findAdjacentCells(x, y);
 
         // calculate number of adjacent bombs
@@ -83,41 +88,58 @@ class Board {
             const cellType = cell.getAttribute('data-type');
             if (cellType === 'bomb') numAdjacentBombs++;
         }
-
-        if (currentCell) {
-            if (numAdjacentBombs > 0) currentCell.innerHTML = String(numAdjacentBombs)
-            currentCell.setAttribute('data-checked', String(true));
-        }
         
         // base case
         if (numAdjacentBombs > 0) {
+            currentCell.innerHTML = String(numAdjacentBombs);
             return;
         } else {
             for (let i = 0; i < adjacentCells.length; i++) {
                 let cell = adjacentCells[i];
-                if (cell.getAttribute('data-checked') !== 'true') {
-                    this.#checkAdjacentCells(cell.getAttribute('data-x'), cell.getAttribute('data-y'));
-                }
+                if (cell.getAttribute('data-status') === 'unchecked') this.#checkAdjacentCells(Number(cell.getAttribute('data-x')), Number(cell.getAttribute('data-y')));
             }
         }
-        
-        // check cells around initial cell, looking for bombs
-            // if no bombs
-                // switch attribute checked to true
-                // generate coordinate pairs of surrounding cells
-                // recursively check each
-            // if bombs
-                // switch attribute checked to false
-                // set button text to number of bombs
-                // exit (base case)
     }
 
-    #handleCellClick(e: MouseEvent, x: number, y: number, cellType: 'notbomb' | 'bomb') {
-        if (cellType === 'bomb') {
-            // game over
-        } else {
-            this.#checkAdjacentCells(x, y);
-        } 
+    #handleMouseDown(e: MouseEvent, x: number, y: number): void {
+        e.preventDefault();
+        const cell: HTMLButtonElement | null = document.querySelector(`[data-x = '${x}'][data-y = '${y}']`);
+        // handle right click - cycle between unchecked, flag, and question
+        if (e.button === 2) {
+            switch (cell?.getAttribute('data-status')) {
+                case 'unchecked':
+                    cell.setAttribute('data-status', 'flag');
+                    if (this.#bombCoordinates.some(coords => coords[0] === x && coords[1] === y)) this.#flaggedBombs++;
+                    break;
+                case 'flag':
+                    cell.setAttribute('data-status', 'question');
+                    if (this.#bombCoordinates.some(coords => coords[0] === x && coords[1] === y)) this.#flaggedBombs--;
+                    break;
+                case 'question':
+                    cell.setAttribute('data-status', 'unchecked');
+                    break;
+            }
+            this.#updateFlaggedBombs();
+        // handle left click - game over if bomb
+        } else if (e.button === 0) {
+            // guards
+            if (cell?.getAttribute('data-status') === 'flag' || cell?.getAttribute('data-status') === 'question') {
+                this.#errorMessage = "This cell has been either flagged or question marked. Please toggle back to unchecked before attempting to check it.";
+                this.#updateErrorMessage();
+                return;
+            } 
+            if (cell?.getAttribute('data-status') === 'checked') {
+                this.#errorMessage = "This cell has already been checked.";
+                this.#updateErrorMessage();
+                return;
+            }
+
+            if (cell?.getAttribute('data-type') === 'bomb') {
+                // game over
+            } else {
+                this.#checkAdjacentCells(x, y);
+            } 
+        }
     }
     
     render() {
@@ -127,30 +149,48 @@ class Board {
             columnDiv.classList.add('row');
             for (let y = 0; y < this.#sideLength; y++) {
                 // creating element and setting key attributes
-                const cellType = this.#boardStatus[x][y];
-
                 const cell: HTMLButtonElement = document.createElement('button');
                 cell.setAttribute('data-x', String(x));
                 cell.setAttribute('data-y', String(y));
-                cell.setAttribute('data-checked', String(false));
-                cell.setAttribute('data-type', cellType);
-                cell.addEventListener('click', (e) => this.#handleCellClick(e, x, y, cellType));
+                cell.setAttribute('data-status', 'unchecked'); // unchecked, checked, flag, question
+                cell.setAttribute('data-type', this.#boardStatus[x][y]); // bomb, notbomb
+                cell.addEventListener('mousedown', (e) => this.#handleMouseDown(e, x, y));
 
-                switch (cellType) {
-                    case 'bomb':
-                        // remove next line
-                        cell.innerHTML = 'B';
-                        
-                        break;
-                    case 'notbomb':
-                        break;
-                    default:
-                        break;
-                }
+                // delete
+                if (this.#boardStatus[x][y] === 'bomb') cell.innerHTML = 'B';
+
                 columnDiv.appendChild(cell);
             }
             board?.appendChild(columnDiv);
         }
+
+        this.#renderInfo();
+    }
+
+    #renderInfo() {
+        const totalBombsInfo: HTMLElement | null = document.getElementById('total-bombs');
+        if (totalBombsInfo) totalBombsInfo.textContent = "Total bombs: " + String(this.#numBombs);
+
+        this.#updateFlaggedBombs();
+        this.#updateErrorMessage();
+    }
+
+    #updateFlaggedBombs() {
+        const flaggedBombsInfo: HTMLParagraphElement | HTMLElement = document.getElementById('flagged-bombs')!;
+        flaggedBombsInfo.textContent = "Flagged bombs: " + String(this.#flaggedBombs);
+    }
+
+    #updateErrorMessage() {
+        const errorMessageInfo: HTMLParagraphElement | HTMLElement = document.getElementById('err-msg')!;
+        errorMessageInfo.textContent = "Error: " + this.#errorMessage;
+    }
+
+    clear() {
+        const board: HTMLElement = document.getElementById('board')!;
+        const info: HTMLElement = document.getElementById('info')!;
+
+        board.innerHTML = '';
+        info.innerHTML = '';
     }
 }
 

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
     if (kind === "m") throw new TypeError("Private method is not writable");
     if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
@@ -10,7 +10,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _Board_instances, _Board_sideLength, _Board_numBombs, _Board_boardStatus, _Board_bombCoordinates, _Board_getRandomInt, _Board_determineBombCoordinates, _Board_initializeBoardStatus, _Board_findAdjacentCells, _Board_checkAdjacentCells, _Board_handleCellClick;
+var _Board_instances, _Board_sideLength, _Board_numBombs, _Board_boardStatus, _Board_bombCoordinates, _Board_flaggedBombs, _Board_errorMessage, _Board_getRandomInt, _Board_determineBombCoordinates, _Board_initializeBoardStatus, _Board_findAdjacentCells, _Board_checkAdjacentCells, _Board_handleMouseDown, _Board_renderInfo, _Board_updateFlaggedBombs, _Board_updateErrorMessage;
 Object.defineProperty(exports, "__esModule", { value: true });
 var Board = /** @class */ (function () {
     function Board(sideLength, numBombs) {
@@ -19,6 +19,8 @@ var Board = /** @class */ (function () {
         _Board_numBombs.set(this, 0);
         _Board_boardStatus.set(this, []);
         _Board_bombCoordinates.set(this, []);
+        _Board_flaggedBombs.set(this, 0);
+        _Board_errorMessage.set(this, '');
         __classPrivateFieldSet(this, _Board_sideLength, sideLength, "f");
         __classPrivateFieldSet(this, _Board_numBombs, numBombs, "f");
         __classPrivateFieldSet(this, _Board_bombCoordinates, __classPrivateFieldGet(this, _Board_instances, "m", _Board_determineBombCoordinates).call(this), "f");
@@ -32,23 +34,15 @@ var Board = /** @class */ (function () {
             columnDiv.classList.add('row');
             var _loop_2 = function (y) {
                 // creating element and setting key attributes
-                var cellType = __classPrivateFieldGet(this_1, _Board_boardStatus, "f")[x][y];
                 var cell = document.createElement('button');
                 cell.setAttribute('data-x', String(x));
                 cell.setAttribute('data-y', String(y));
-                cell.setAttribute('data-checked', String(false));
-                cell.setAttribute('data-type', cellType);
-                cell.addEventListener('click', function (e) { return __classPrivateFieldGet(_this, _Board_instances, "m", _Board_handleCellClick).call(_this, e, x, y, cellType); });
-                switch (cellType) {
-                    case 'bomb':
-                        // remove next line
-                        cell.innerHTML = 'B';
-                        break;
-                    case 'notbomb':
-                        break;
-                    default:
-                        break;
-                }
+                cell.setAttribute('data-status', 'unchecked'); // unchecked, checked, flag, question
+                cell.setAttribute('data-type', __classPrivateFieldGet(this_1, _Board_boardStatus, "f")[x][y]); // bomb, notbomb
+                cell.addEventListener('mousedown', function (e) { return __classPrivateFieldGet(_this, _Board_instances, "m", _Board_handleMouseDown).call(_this, e, x, y); });
+                // delete
+                if (__classPrivateFieldGet(this_1, _Board_boardStatus, "f")[x][y] === 'bomb')
+                    cell.innerHTML = 'B';
                 columnDiv.appendChild(cell);
             };
             for (var y = 0; y < __classPrivateFieldGet(this_1, _Board_sideLength, "f"); y++) {
@@ -60,10 +54,17 @@ var Board = /** @class */ (function () {
         for (var x = 0; x < __classPrivateFieldGet(this, _Board_sideLength, "f"); x++) {
             _loop_1(x);
         }
+        __classPrivateFieldGet(this, _Board_instances, "m", _Board_renderInfo).call(this);
+    };
+    Board.prototype.clear = function () {
+        var board = document.getElementById('board');
+        var info = document.getElementById('info');
+        board.innerHTML = '';
+        info.innerHTML = '';
     };
     return Board;
 }());
-_Board_sideLength = new WeakMap(), _Board_numBombs = new WeakMap(), _Board_boardStatus = new WeakMap(), _Board_bombCoordinates = new WeakMap(), _Board_instances = new WeakSet(), _Board_getRandomInt = function _Board_getRandomInt(max) {
+_Board_sideLength = new WeakMap(), _Board_numBombs = new WeakMap(), _Board_boardStatus = new WeakMap(), _Board_bombCoordinates = new WeakMap(), _Board_flaggedBombs = new WeakMap(), _Board_errorMessage = new WeakMap(), _Board_instances = new WeakSet(), _Board_getRandomInt = function _Board_getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }, _Board_determineBombCoordinates = function _Board_determineBombCoordinates() {
     var bombCoordinates = [];
@@ -104,8 +105,6 @@ _Board_sideLength = new WeakMap(), _Board_numBombs = new WeakMap(), _Board_board
     }
 }, _Board_findAdjacentCells = function _Board_findAdjacentCells(x, y) {
     var adjacentCells = [];
-    x = Number(x);
-    y = Number(y);
     for (var i = (x - 1); i <= (x + 1); i++) {
         // x outside of board
         if (i < 0 || i > __classPrivateFieldGet(this, _Board_sideLength, "f") - 1)
@@ -119,16 +118,14 @@ _Board_sideLength = new WeakMap(), _Board_numBombs = new WeakMap(), _Board_board
                 continue;
             var cell = document.querySelector("[data-x = '".concat(i, "'][data-y = '").concat(j, "']"));
             // cell has already been checked
-            if ((cell === null || cell === void 0 ? void 0 : cell.getAttribute('data-checked')) === 'true')
-                continue;
-            // cell is unchecked and within board
-            if (cell)
+            if ((cell === null || cell === void 0 ? void 0 : cell.getAttribute('data-status')) === 'unchecked')
                 adjacentCells.push(cell);
         }
     }
     return adjacentCells;
 }, _Board_checkAdjacentCells = function _Board_checkAdjacentCells(x, y) {
     var currentCell = document.querySelector("[data-x = '".concat(x, "'][data-y = '").concat(y, "']"));
+    currentCell.setAttribute('data-status', 'checked');
     var adjacentCells = __classPrivateFieldGet(this, _Board_instances, "m", _Board_findAdjacentCells).call(this, x, y);
     // calculate number of adjacent bombs
     var numAdjacentBombs = 0;
@@ -138,38 +135,72 @@ _Board_sideLength = new WeakMap(), _Board_numBombs = new WeakMap(), _Board_board
         if (cellType === 'bomb')
             numAdjacentBombs++;
     }
-    if (currentCell) {
-        if (numAdjacentBombs > 0)
-            currentCell.innerHTML = String(numAdjacentBombs);
-        currentCell.setAttribute('data-checked', String(true));
-    }
     // base case
     if (numAdjacentBombs > 0) {
+        currentCell.innerHTML = String(numAdjacentBombs);
         return;
     }
     else {
         for (var i = 0; i < adjacentCells.length; i++) {
             var cell = adjacentCells[i];
-            if (cell.getAttribute('data-checked') !== 'true') {
-                __classPrivateFieldGet(this, _Board_instances, "m", _Board_checkAdjacentCells).call(this, cell.getAttribute('data-x'), cell.getAttribute('data-y'));
-            }
+            if (cell.getAttribute('data-status') === 'unchecked')
+                __classPrivateFieldGet(this, _Board_instances, "m", _Board_checkAdjacentCells).call(this, Number(cell.getAttribute('data-x')), Number(cell.getAttribute('data-y')));
         }
     }
-    // check cells around initial cell, looking for bombs
-    // if no bombs
-    // switch attribute checked to true
-    // generate coordinate pairs of surrounding cells
-    // recursively check each
-    // if bombs
-    // switch attribute checked to false
-    // set button text to number of bombs
-    // exit (base case)
-}, _Board_handleCellClick = function _Board_handleCellClick(e, x, y, cellType) {
-    if (cellType === 'bomb') {
-        // game over
+}, _Board_handleMouseDown = function _Board_handleMouseDown(e, x, y) {
+    var _a, _b;
+    e.preventDefault();
+    var cell = document.querySelector("[data-x = '".concat(x, "'][data-y = '").concat(y, "']"));
+    // handle right click - cycle between unchecked, flag, and question
+    if (e.button === 2) {
+        switch (cell === null || cell === void 0 ? void 0 : cell.getAttribute('data-status')) {
+            case 'unchecked':
+                cell.setAttribute('data-status', 'flag');
+                if (__classPrivateFieldGet(this, _Board_bombCoordinates, "f").some(function (coords) { return coords[0] === x && coords[1] === y; }))
+                    __classPrivateFieldSet(this, _Board_flaggedBombs, (_a = __classPrivateFieldGet(this, _Board_flaggedBombs, "f"), _a++, _a), "f");
+                break;
+            case 'flag':
+                cell.setAttribute('data-status', 'question');
+                if (__classPrivateFieldGet(this, _Board_bombCoordinates, "f").some(function (coords) { return coords[0] === x && coords[1] === y; }))
+                    __classPrivateFieldSet(this, _Board_flaggedBombs, (_b = __classPrivateFieldGet(this, _Board_flaggedBombs, "f"), _b--, _b), "f");
+                break;
+            case 'question':
+                cell.setAttribute('data-status', 'unchecked');
+                break;
+        }
+        __classPrivateFieldGet(this, _Board_instances, "m", _Board_updateFlaggedBombs).call(this);
+        // handle left click - game over if bomb
     }
-    else {
-        __classPrivateFieldGet(this, _Board_instances, "m", _Board_checkAdjacentCells).call(this, x, y);
+    else if (e.button === 0) {
+        // guards
+        if ((cell === null || cell === void 0 ? void 0 : cell.getAttribute('data-status')) === 'flag' || (cell === null || cell === void 0 ? void 0 : cell.getAttribute('data-status')) === 'question') {
+            __classPrivateFieldSet(this, _Board_errorMessage, "This cell has been either flagged or question marked. Please toggle back to unchecked before attempting to check it.", "f");
+            __classPrivateFieldGet(this, _Board_instances, "m", _Board_updateErrorMessage).call(this);
+            return;
+        }
+        if ((cell === null || cell === void 0 ? void 0 : cell.getAttribute('data-status')) === 'checked') {
+            __classPrivateFieldSet(this, _Board_errorMessage, "This cell has already been checked.", "f");
+            __classPrivateFieldGet(this, _Board_instances, "m", _Board_updateErrorMessage).call(this);
+            return;
+        }
+        if ((cell === null || cell === void 0 ? void 0 : cell.getAttribute('data-type')) === 'bomb') {
+            // game over
+        }
+        else {
+            __classPrivateFieldGet(this, _Board_instances, "m", _Board_checkAdjacentCells).call(this, x, y);
+        }
     }
+}, _Board_renderInfo = function _Board_renderInfo() {
+    var totalBombsInfo = document.getElementById('total-bombs');
+    if (totalBombsInfo)
+        totalBombsInfo.textContent = "Total bombs: " + String(__classPrivateFieldGet(this, _Board_numBombs, "f"));
+    __classPrivateFieldGet(this, _Board_instances, "m", _Board_updateFlaggedBombs).call(this);
+    __classPrivateFieldGet(this, _Board_instances, "m", _Board_updateErrorMessage).call(this);
+}, _Board_updateFlaggedBombs = function _Board_updateFlaggedBombs() {
+    var flaggedBombsInfo = document.getElementById('flagged-bombs');
+    flaggedBombsInfo.textContent = "Flagged bombs: " + String(__classPrivateFieldGet(this, _Board_flaggedBombs, "f"));
+}, _Board_updateErrorMessage = function _Board_updateErrorMessage() {
+    var errorMessageInfo = document.getElementById('err-msg');
+    errorMessageInfo.textContent = "Error: " + __classPrivateFieldGet(this, _Board_errorMessage, "f");
 };
 exports.default = Board;

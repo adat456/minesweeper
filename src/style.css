@@ -125,13 +125,27 @@ progress {
   display: flex;
   flex-direction: column;
 }
+/* 
+comment */
 
-button {
+.hidden {
+  display: none;
+}
+
+#board button {
   width: 40px;
   height: 40px;
   border-color: lightgray;
 }
 
-button[data-checked="true"] {
+button[data-status="checked"] {
   background-color: white;
+}
+
+button[data-status="flag"] {
+  background-color: orange;
+}
+
+button[data-status="question"] {
+  background-color: yellow;
 }
