@@ -10,42 +10,43 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _Board_instances, _Board_width, _Board_length, _Board_numMines, _Board_cellTypes, _Board_mineCoords, _Board_flaggedMines, _Board_getRandomInt, _Board_generateMineCoords, _Board_initializeCellTypes, _Board_findAdjacentCells, _Board_areAllNotMineCellsChecked, _Board_checkAdjacentCells, _Board_handleMouseDown;
-import { setOutcome, updateInfo } from "./main";
+var _Board_instances, _Board_width, _Board_length, _Board_numMines, _Board_firstClick, _Board_mineCoords, _Board_flaggedMines, _Board_getRandomInt, _Board_generateMineCoords, _Board_findAdjacentCells, _Board_areAllNotMineCellsChecked, _Board_checkAdjacentCells, _Board_handleMouseDown;
+import { placeMines, setOutcome, updateInfo } from "./main";
 class Board {
     constructor(width, length, numMines) {
         _Board_instances.add(this);
         _Board_width.set(this, 0);
         _Board_length.set(this, 0);
         _Board_numMines.set(this, 0);
-        _Board_cellTypes.set(this, []);
+        _Board_firstClick.set(this, false);
         _Board_mineCoords.set(this, []);
         _Board_flaggedMines.set(this, 0);
         __classPrivateFieldSet(this, _Board_width, width, "f");
         __classPrivateFieldSet(this, _Board_length, length, "f");
         __classPrivateFieldSet(this, _Board_numMines, numMines, "f");
-        __classPrivateFieldGet(this, _Board_instances, "m", _Board_generateMineCoords).call(this);
-        __classPrivateFieldGet(this, _Board_instances, "m", _Board_initializeCellTypes).call(this);
     }
     getLength() { return __classPrivateFieldGet(this, _Board_length, "f"); }
     getWidth() { return __classPrivateFieldGet(this, _Board_width, "f"); }
-    getCellTypes() { return __classPrivateFieldGet(this, _Board_cellTypes, "f"); }
     getNumMines() { return __classPrivateFieldGet(this, _Board_numMines, "f"); }
+    getMineCoords() { return __classPrivateFieldGet(this, _Board_mineCoords, "f"); }
     getFlaggedMines() { return __classPrivateFieldGet(this, _Board_flaggedMines, "f"); }
     getHandleMouseDownFunction() {
         const boundHandleMouseDown = __classPrivateFieldGet(this, _Board_instances, "m", _Board_handleMouseDown).bind(this);
         return boundHandleMouseDown;
     }
 }
-_Board_width = new WeakMap(), _Board_length = new WeakMap(), _Board_numMines = new WeakMap(), _Board_cellTypes = new WeakMap(), _Board_mineCoords = new WeakMap(), _Board_flaggedMines = new WeakMap(), _Board_instances = new WeakSet(), _Board_getRandomInt = function _Board_getRandomInt(max) {
+_Board_width = new WeakMap(), _Board_length = new WeakMap(), _Board_numMines = new WeakMap(), _Board_firstClick = new WeakMap(), _Board_mineCoords = new WeakMap(), _Board_flaggedMines = new WeakMap(), _Board_instances = new WeakSet(), _Board_getRandomInt = function _Board_getRandomInt(max) {
     return Math.floor(Math.random() * max);
-}, _Board_generateMineCoords = function _Board_generateMineCoords() {
+}, _Board_generateMineCoords = function _Board_generateMineCoords(excludeX, excludeY) {
     // creates an array with multiple subarrays, each subarray being the (x, y) coordinate of a mine
+    // avoids generating repeat coords and coord of first click button
     let mineCoords = [];
     for (let i = 0; i < __classPrivateFieldGet(this, _Board_numMines, "f"); i++) {
         let x = -1;
         let y = -1;
-        while (mineCoords.some(coordinatePair => coordinatePair[0] == x && coordinatePair[1] == y) || (x == -1 && y == -1)) {
+        while (mineCoords.some(coordinatePair => coordinatePair[0] == x && coordinatePair[1] == y) ||
+            (x == -1 && y == -1) ||
+            (x == excludeX && y == excludeY)) {
             x = __classPrivateFieldGet(this, _Board_instances, "m", _Board_getRandomInt).call(this, __classPrivateFieldGet(this, _Board_length, "f"));
             y = __classPrivateFieldGet(this, _Board_instances, "m", _Board_getRandomInt).call(this, __classPrivateFieldGet(this, _Board_width, "f"));
         }
@@ -53,21 +54,6 @@ _Board_width = new WeakMap(), _Board_length = new WeakMap(), _Board_numMines = n
         mineCoords[i] = [x, y];
     }
     __classPrivateFieldSet(this, _Board_mineCoords, mineCoords, "f");
-}, _Board_initializeCellTypes = function _Board_initializeCellTypes() {
-    // creates an array of arrays, where each array is a row
-    // at each (i, j) is a word that describes the cell's status
-    for (let i = 0; i < __classPrivateFieldGet(this, _Board_width, "f"); i++) {
-        let row = [];
-        for (let j = 0; j < __classPrivateFieldGet(this, _Board_length, "f"); j++) {
-            if (__classPrivateFieldGet(this, _Board_mineCoords, "f").some(coordinatePair => coordinatePair[0] == i && coordinatePair[1] == j)) {
-                row[j] = 'mine';
-            }
-            else {
-                row[j] = 'notmine';
-            }
-        }
-        __classPrivateFieldGet(this, _Board_cellTypes, "f")[i] = row;
-    }
 }, _Board_findAdjacentCells = function _Board_findAdjacentCells(x, y) {
     // returns cells surrounding the current coods, as long as each cell is within bounds and has not yet been checked
     let adjacentCells = [];
@@ -121,6 +107,13 @@ _Board_width = new WeakMap(), _Board_length = new WeakMap(), _Board_numMines = n
 }, _Board_handleMouseDown = function _Board_handleMouseDown(e, x, y) {
     var _a, _b;
     e.preventDefault();
+    // guard clause - responsible for generating the mines on the first click
+    if (__classPrivateFieldGet(this, _Board_firstClick, "f") === false) {
+        __classPrivateFieldSet(this, _Board_firstClick, true, "f");
+        __classPrivateFieldGet(this, _Board_instances, "m", _Board_generateMineCoords).call(this, x, y);
+        placeMines();
+        return;
+    }
     const cell = document.querySelector(`[data-x = '${x}'][data-y = '${y}']`);
     // handle right click - cycle between unchecked, flag, and question
     if (e.button === 2) {

@@ -1,12 +1,16 @@
 'use strict';
-import { mainMenu, startClassicButton, startCustomizedButton, restartButtons, returnButtons, game, customizationForm, validationErrMsgs, widthInput, lengthInput, minesInput, endGameDialog } from "./elements";
+import { mainMenu, startClassicButton, startCustomizedButton, restartButtons, returnButtons, game, customizationForm, validationErrMsgs, widthInput, lengthInput, minesInput, endGameDialog, levelInfo } from "./elements";
 import Board from "./Board";
 import BoardUI from "./BoardUI";
 document.addEventListener('contextmenu', e => e.preventDefault(), false);
 const classicDifficultyProgression = [
-    { width: 9, length: 9, mines: 10, level: 'easy' },
-    { width: 16, length: 16, mines: 40, level: 'intermediate' },
-    { width: 16, length: 30, mines: 99, level: 'expert' },
+    { width: 10, length: 10, mines: 10, level: 'Easy #1' },
+    { width: 9, length: 9, mines: 9, level: 'Easy #2' },
+    { width: 8, length: 8, mines: 10, level: 'Easy #3' },
+    { width: 16, length: 16, mines: 40, level: 'Intermediate #1' },
+    { width: 15, length: 15, mines: 40, level: 'Intermediate #2' },
+    { width: 14, length: 14, mines: 40, level: 'Intermediate #3' },
+    { width: 16, length: 30, mines: 99, level: 'Expert' },
 ];
 let gameActive = false; // responsible for switching between main menu and game
 let gameBoard = null;
@@ -43,6 +47,10 @@ function renderCustomizedInputErrMsgs(errMsgs) {
         errMsgItem.textContent = errMsg;
         validationErrMsgs.appendChild(errMsgItem);
     }
+}
+export function placeMines() {
+    if (gameBoard)
+        BoardUI.placeMines(gameBoard.getMineCoords());
 }
 export function updateInfo() {
     if (gameBoard)
@@ -104,8 +112,9 @@ function renderMain() {
     else {
         mainMenu.classList.add('hidden');
         game.classList.remove('hidden');
+        levelInfo.textContent = mode === 'classic' ? `Level: ${classicDifficultyProgression[classicDifficultyLevel].level}` : '';
         if (gameBoard) {
-            BoardUI.renderBoard(gameBoard.getLength(), gameBoard.getWidth(), gameBoard.getCellTypes(), gameBoard.getHandleMouseDownFunction());
+            BoardUI.renderInitialBoard(gameBoard.getLength(), gameBoard.getWidth(), gameBoard.getHandleMouseDownFunction());
             updateInfo();
         }
     }

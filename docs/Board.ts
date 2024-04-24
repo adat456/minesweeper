@@ -1,13 +1,11 @@
 'use strict';
-import { setOutcome, updateInfo } from "./main";
-
-type CellType = 'notmine'[] | 'mine'[];
+import { placeMines, setOutcome, updateInfo } from "./main";
 
 export default class Board {
     #width = 0;
     #length = 0;
     #numMines = 0;
-    #cellTypes: CellType[] = [];
+    #firstClick = false;
     #mineCoords: number[][] = [];
     #flaggedMines: number = 0;
 
@@ -15,22 +13,24 @@ export default class Board {
         this.#width = width;
         this.#length = length;
         this.#numMines = numMines;
-
-        this.#generateMineCoords();
-        this.#initializeCellTypes();
     }
 
     #getRandomInt(max: number) {
         return Math.floor(Math.random() * max);
     }
     
-    #generateMineCoords(): void {
+    #generateMineCoords(excludeX: number, excludeY: number): void {
         // creates an array with multiple subarrays, each subarray being the (x, y) coordinate of a mine
+        // avoids generating repeat coords and coord of first click button
         let mineCoords: number[][] = [];
         for (let i = 0; i < this.#numMines; i++) {
             let x = -1;
             let y = -1;
-            while (mineCoords.some(coordinatePair => coordinatePair[0] == x && coordinatePair[1] == y) || (x == -1 && y == -1)) {
+            while (
+                mineCoords.some(coordinatePair => coordinatePair[0] == x && coordinatePair[1] == y) || 
+                (x == -1 && y == -1) || 
+                (x == excludeX && y == excludeY)
+            ) {
                 x = this.#getRandomInt(this.#length);
                 y = this.#getRandomInt(this.#width);
             };
@@ -38,22 +38,7 @@ export default class Board {
         }
         this.#mineCoords = mineCoords;
     }
-    
-    #initializeCellTypes(): void {
-        // creates an array of arrays, where each array is a row
-        // at each (i, j) is a word that describes the cell's status
-        for (let i = 0; i < this.#width; i++) {
-            let row: CellType = [];
-            for (let j = 0; j < this.#length; j++) {
-                if (this.#mineCoords.some(coordinatePair => coordinatePair[0] == i && coordinatePair[1] == j)) {
-                    row[j] = 'mine';
-                } else {
-                    row[j] = 'notmine';
-                }
-            }
-            this.#cellTypes[i] = row;
-        }
-    }
+ 
 
     #findAdjacentCells(x: number, y: number): HTMLButtonElement[] {
         // returns cells surrounding the current coods, as long as each cell is within bounds and has not yet been checked
@@ -114,6 +99,15 @@ export default class Board {
     // minor UI manipulation
     #handleMouseDown(e: MouseEvent, x: number, y: number): void {
         e.preventDefault();
+
+        // guard clause - responsible for generating the mines on the first click
+        if (this.#firstClick === false) {
+            this.#firstClick = true;
+            this.#generateMineCoords(x, y);
+            placeMines();
+            return;
+        }
+
         const cell: HTMLButtonElement | null = document.querySelector(`[data-x = '${x}'][data-y = '${y}']`);
         // handle right click - cycle between unchecked, flag, and question
         if (e.button === 2) {
@@ -154,9 +148,9 @@ export default class Board {
 
     getWidth() { return this.#width; }
 
-    getCellTypes() { return this.#cellTypes; }
-
     getNumMines() { return this.#numMines; }
+
+    getMineCoords() { return this.#mineCoords; }
 
     getFlaggedMines() { return this.#flaggedMines; }
 

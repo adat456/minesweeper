@@ -16,7 +16,7 @@ export const widthInput = document.getElementById('width');
 export const lengthInput = document.getElementById('length');
 export const minesInput = document.getElementById('mines');
 // info
-export const info = document.getElementById('info');
+export const levelInfo = document.getElementById('level');
 export const flaggedMinesInfo = document.getElementById('flagged-mines');
 // end game dialog
 export const endGameDialog = document.getElementById('end-game');

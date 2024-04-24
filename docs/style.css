@@ -132,8 +132,8 @@ progress {
 }
 
 #board button {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   border-color: lightgray;
 }
 
@@ -142,9 +142,11 @@ button[data-status="checked"] {
 }
 
 button[data-status="flag"] {
-  background-color: orange;
+  background: url("icons/flag.svg") no-repeat center;
+  background-size: 15px 15px;
 }
 
 button[data-status="question"] {
-  background-color: yellow;
+  background: url("icons/question.svg") no-repeat center;
+  background-size: 15px 15px;
 }

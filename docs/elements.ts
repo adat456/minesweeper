@@ -19,7 +19,7 @@ export const lengthInput = document.getElementById('length') as HTMLInputElement
 export const minesInput = document.getElementById('mines') as HTMLInputElement;
 
 // info
-export const info = document.getElementById('info') as HTMLDivElement;
+export const levelInfo = document.getElementById('level') as HTMLParagraphElement;
 export const flaggedMinesInfo = document.getElementById('flagged-mines') as HTMLParagraphElement;
 
 // end game dialog
