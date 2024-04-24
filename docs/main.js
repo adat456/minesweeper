@@ -4,12 +4,9 @@ import Board from "./Board";
 import BoardUI from "./BoardUI";
 document.addEventListener('contextmenu', e => e.preventDefault(), false);
 const classicDifficultyProgression = [
-    // {width: 9, length: 9, mines: 10, level: 'easy'},
-    // {width: 16, length: 16, mines: 40, level: 'intermediate'},
-    // {width: 16, length: 30, mines: 99, level: 'expert'},
-    { width: 2, length: 2, mines: 1, level: 'easy' },
-    { width: 3, length: 3, mines: 1, level: 'intermediate' },
-    { width: 4, length: 4, mines: 1, level: 'expert' },
+    { width: 9, length: 9, mines: 10, level: 'easy' },
+    { width: 16, length: 16, mines: 40, level: 'intermediate' },
+    { width: 16, length: 30, mines: 99, level: 'expert' },
 ];
 let gameActive = false; // responsible for switching between main menu and game
 let gameBoard = null;
