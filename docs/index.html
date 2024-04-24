@@ -37,15 +37,20 @@
     </section>
     <section id="game" class="hidden">
       <div id="settings">
-        <button id="restart">Restart</button>
-        <button id="return">Return</button>
+        <button class="restart">Regenerate board</button>
+        <button class="return">Return to main menu</button>
       </div>
       <div id="board"></div>
-      <div id="info">
-        <p id="total-bombs"></p>
-        <p id="flagged-bombs"></p>
-        <p id="err-msg"></p>
-      </div>
+      <!-- <div id="info"> -->
+        <p id="flagged-mines"></p>
+      <!-- </div> -->
+      <dialog id="end-game">
+        <p id="end-game-msg"></p>
+        <div>
+          <button class="restart"></button>
+          <button class="return">Return to main menu</button>
+        </div>
+      </dialog>
     </section>
   </main>
   <script src="main.js"></script>
