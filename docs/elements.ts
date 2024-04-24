@@ -18,6 +18,11 @@ export const widthInput = document.getElementById('width') as HTMLInputElement;
 export const lengthInput = document.getElementById('length') as HTMLInputElement;
 export const minesInput = document.getElementById('mines') as HTMLInputElement;
 
+// timer
+export const hourDisplay = document.getElementById('hour') as HTMLSpanElement;
+export const minuteDisplay = document.getElementById('minute') as HTMLSpanElement;
+export const secondDisplay = document.getElementById('second') as HTMLSpanElement;
+
 // info
 export const levelInfo = document.getElementById('level') as HTMLParagraphElement;
 export const flaggedMinesInfo = document.getElementById('flagged-mines') as HTMLParagraphElement;
@@ -25,3 +30,4 @@ export const flaggedMinesInfo = document.getElementById('flagged-mines') as HTML
 // end game dialog
 export const endGameDialog = document.getElementById('end-game') as HTMLDialogElement;
 export const dialogMessage = document.getElementById('end-game-msg') as HTMLParagraphElement
+export const elapsedTime = document.getElementById('elapsed-time') as HTMLParagraphElement;

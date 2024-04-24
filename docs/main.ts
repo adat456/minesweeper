@@ -2,6 +2,7 @@
 import { mainMenu, startClassicButton, startCustomizedButton, restartButtons, returnButtons, game, customizationForm, validationErrMsgs, widthInput, lengthInput, minesInput, endGameDialog, levelInfo } from "./elements";
 import Board from "./Board";
 import BoardUI from "./BoardUI";
+import Timer from "./Timer";
 
 type Outcome = 'win' | 'lose';
 
@@ -21,6 +22,7 @@ let gameActive = false; // responsible for switching between main menu and game
 let gameBoard: Board | null = null;
 let mode: 'classic' | 'customized' = 'classic';
 let classicDifficultyLevel = 0;
+let timer: Timer = new Timer();
 
 let width = 0;
 let length = 0;
@@ -56,8 +58,8 @@ function renderCustomizedInputErrMsgs(errMsgs: string[]) {
     }
 }
 
-export function placeMines() {
-    if (gameBoard) BoardUI.placeMines(gameBoard.getMineCoords());
+export function startTimer() {
+    timer.start();
 }
 
 export function updateInfo() {
@@ -65,14 +67,15 @@ export function updateInfo() {
 }   
 
 export function setOutcome(outcome: Outcome) {
+    timer.pause();
+
     if (mode === 'classic' && outcome === 'win') classicDifficultyLevel++;
 
     if (mode === 'classic' && classicDifficultyLevel > classicDifficultyProgression.length) {
-        BoardUI.renderEndGameDialog(mode, outcome, true);
+        BoardUI.renderEndGameDialog(mode, outcome, timer.getTimeString(), true);
     } else {
-        BoardUI.renderEndGameDialog(mode, outcome, false);
+        BoardUI.renderEndGameDialog(mode, outcome, timer.getTimeString(), false);
     }
-    
 }
 
 startClassicButton.addEventListener('click', () => {
@@ -122,16 +125,18 @@ returnButtons.forEach(button =>
 );
 
 function renderMain() {
+    timer.reset();
     BoardUI.clearBoardAndInfo();
+
     if (!gameActive) {
         mainMenu.classList.remove('hidden');
         game.classList.add('hidden');
     } else {
         mainMenu.classList.add('hidden');
         game.classList.remove('hidden');
-        levelInfo.textContent = mode === 'classic' ? `Level: ${classicDifficultyProgression[classicDifficultyLevel].level}` : '';
         if (gameBoard) {
             BoardUI.renderInitialBoard(gameBoard.getLength(), gameBoard.getWidth(), gameBoard.getHandleMouseDownFunction());
+            levelInfo.textContent = mode === 'classic' ? `Level: ${classicDifficultyProgression[classicDifficultyLevel].level}` : '';
             updateInfo();
         }
     }

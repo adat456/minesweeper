@@ -10,8 +10,8 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _Board_instances, _Board_width, _Board_length, _Board_numMines, _Board_firstClick, _Board_mineCoords, _Board_flaggedMines, _Board_getRandomInt, _Board_generateMineCoords, _Board_findAdjacentCells, _Board_areAllNotMineCellsChecked, _Board_checkAdjacentCells, _Board_handleMouseDown;
-import { placeMines, setOutcome, updateInfo } from "./main";
+var _Board_instances, _Board_width, _Board_length, _Board_numMines, _Board_firstClick, _Board_mineCoords, _Board_flaggedMines, _Board_getRandomInt, _Board_generateMineCoords, _Board_placeMines, _Board_findAdjacentCells, _Board_areAllNotMineCellsChecked, _Board_checkAdjacentCells, _Board_handleMouseDown;
+import { startTimer, setOutcome, updateInfo } from "./main";
 class Board {
     constructor(width, length, numMines) {
         _Board_instances.add(this);
@@ -54,6 +54,12 @@ _Board_width = new WeakMap(), _Board_length = new WeakMap(), _Board_numMines = n
         mineCoords[i] = [x, y];
     }
     __classPrivateFieldSet(this, _Board_mineCoords, mineCoords, "f");
+}, _Board_placeMines = function _Board_placeMines() {
+    for (const coordPair of __classPrivateFieldGet(this, _Board_mineCoords, "f")) {
+        const cell = document.querySelector(`[data-x = '${coordPair[0]}'][data-y = '${coordPair[1]}']`);
+        cell.setAttribute('data-type', 'mine');
+        // cell.innerHTML = 'B'; // delete
+    }
 }, _Board_findAdjacentCells = function _Board_findAdjacentCells(x, y) {
     // returns cells surrounding the current coods, as long as each cell is within bounds and has not yet been checked
     let adjacentCells = [];
@@ -107,12 +113,12 @@ _Board_width = new WeakMap(), _Board_length = new WeakMap(), _Board_numMines = n
 }, _Board_handleMouseDown = function _Board_handleMouseDown(e, x, y) {
     var _a, _b;
     e.preventDefault();
-    // guard clause - responsible for generating the mines on the first click
+    // responsible for generating the mines on the first click
     if (__classPrivateFieldGet(this, _Board_firstClick, "f") === false) {
         __classPrivateFieldSet(this, _Board_firstClick, true, "f");
         __classPrivateFieldGet(this, _Board_instances, "m", _Board_generateMineCoords).call(this, x, y);
-        placeMines();
-        return;
+        __classPrivateFieldGet(this, _Board_instances, "m", _Board_placeMines).call(this);
+        startTimer();
     }
     const cell = document.querySelector(`[data-x = '${x}'][data-y = '${y}']`);
     // handle right click - cycle between unchecked, flag, and question

@@ -1,5 +1,5 @@
 'use strict';
-import { placeMines, setOutcome, updateInfo } from "./main";
+import { startTimer, setOutcome, updateInfo } from "./main";
 
 export default class Board {
     #width = 0;
@@ -38,7 +38,14 @@ export default class Board {
         }
         this.#mineCoords = mineCoords;
     }
- 
+
+    #placeMines() {
+        for (const coordPair of this.#mineCoords) {
+            const cell = document.querySelector(`[data-x = '${coordPair[0]}'][data-y = '${coordPair[1]}']`) as HTMLButtonElement;
+            cell.setAttribute('data-type', 'mine');
+            // cell.innerHTML = 'B'; // delete
+        }
+    }
 
     #findAdjacentCells(x: number, y: number): HTMLButtonElement[] {
         // returns cells surrounding the current coods, as long as each cell is within bounds and has not yet been checked
@@ -100,12 +107,12 @@ export default class Board {
     #handleMouseDown(e: MouseEvent, x: number, y: number): void {
         e.preventDefault();
 
-        // guard clause - responsible for generating the mines on the first click
+        // responsible for generating the mines on the first click
         if (this.#firstClick === false) {
             this.#firstClick = true;
             this.#generateMineCoords(x, y);
-            placeMines();
-            return;
+            this.#placeMines();
+            startTimer();
         }
 
         const cell: HTMLButtonElement | null = document.querySelector(`[data-x = '${x}'][data-y = '${y}']`);

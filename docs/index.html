@@ -7,12 +7,12 @@
 </head>
 <body>
   <main id="minesweeper">
+    <h1>Minesweeper</h1>
     <section id="main-menu">
-      <h1>Minesweeper</h1>
       <div>
         <h2>Classic</h2>
         <p>Starts with a beginner grid and mine density. Increases in difficulty with each successful round.</p>
-        <button id="start-classic" type="button">Start game</button>
+        <button id="start-classic" class="start-game" type="button">Start game</button>
       </div>
       <div>
         <h2>Customized</h2>
@@ -24,31 +24,38 @@
             <input type="number" id="length" required />
           </div>
           <div>
-            <label for="width">Width:</label>
+            <label for="width">Width</label>
             <input type="number" id="width" required />
           </div>
           <div>
-            <label for="mines">Mines:</label>
+            <label for="mines">Mines</label>
             <input type="number" id="mines" required />
           </div>
         </form>
-        <button id="start-customized" type="button">Start game</button>
+        <button id="start-customized" class="start-game" type="button">Start game</button>
       </div>
     </section>
     <section id="game" class="hidden">
       <div id="board"></div>
       <div id="settings">
-        <p id="level"></p>
-        <p id="flagged-mines"></p>
-        <div id="timer"></div>
-        <button class="restart">Regenerate board</button>
+        <div id="info">
+          <p id="level"></p>
+          <p id="flagged-mines"></p>
+        </div>
+        <div id="timer">
+          <span id="hour">00</span>:<span id="minute">00</span>:<span id="second">00</span>
+        </div>
+        <button class="restart start-game">Regenerate</button>
         <button class="return">Return to main menu</button>
       </div>
       <dialog id="end-game">
-        <p id="end-game-msg"></p>
         <div>
-          <button class="restart"></button>
-          <button class="return">Return to main menu</button>
+          <p id="end-game-msg"></p>
+          <p id="elapsed-time"></p>
+          <div>
+            <button class="restart start-game"></button>
+            <button class="return">Return to main menu</button>
+          </div>
         </div>
       </dialog>
     </section>

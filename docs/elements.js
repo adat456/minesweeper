@@ -15,9 +15,14 @@ export const validationErrMsgs = document.getElementById('validation-err-msgs');
 export const widthInput = document.getElementById('width');
 export const lengthInput = document.getElementById('length');
 export const minesInput = document.getElementById('mines');
+// timer
+export const hourDisplay = document.getElementById('hour');
+export const minuteDisplay = document.getElementById('minute');
+export const secondDisplay = document.getElementById('second');
 // info
 export const levelInfo = document.getElementById('level');
 export const flaggedMinesInfo = document.getElementById('flagged-mines');
 // end game dialog
 export const endGameDialog = document.getElementById('end-game');
 export const dialogMessage = document.getElementById('end-game-msg');
+export const elapsedTime = document.getElementById('elapsed-time');

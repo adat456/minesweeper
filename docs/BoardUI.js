@@ -1,4 +1,4 @@
-import { board, flaggedMinesInfo, endGameDialog, dialogMessage, dialogRestartButton } from './elements';
+import { board, flaggedMinesInfo, endGameDialog, dialogMessage, elapsedTime, dialogRestartButton } from './elements';
 export default class BoardUI {
     static renderInitialBoard(length, width, mouseDownHandler) {
         for (let x = 0; x < length; x++) {
@@ -17,13 +17,6 @@ export default class BoardUI {
             board.appendChild(columnDiv);
         }
     }
-    static placeMines(mineCoords) {
-        for (const coordPair of mineCoords) {
-            const cell = document.querySelector(`[data-x = '${coordPair[0]}'][data-y = '${coordPair[1]}']`);
-            cell.setAttribute('data-type', 'mine');
-            cell.innerHTML = 'B'; // delete
-        }
-    }
     static renderInfo(totalMines, flaggedMines) {
         flaggedMinesInfo.textContent = `Flagged mines: ${flaggedMines}/${totalMines}`;
     }
@@ -31,10 +24,11 @@ export default class BoardUI {
         board.innerHTML = '';
         flaggedMinesInfo.textContent = '';
     }
-    static renderEndGameDialog(mode, outcome, classicEnd) {
+    static renderEndGameDialog(mode, outcome, time, classicEnd) {
         dialogMessage.textContent =
             outcome === 'lose' ? 'You exploded...' :
                 classicEnd === false ? 'You survived!' : 'You made it through all the levels. Congrats!';
+        elapsedTime.textContent = `Elapsed time: ${time}`;
         if (classicEnd) {
             dialogRestartButton.classList.add('hidden');
         }
@@ -47,6 +41,7 @@ export default class BoardUI {
     }
     static resetEndGameDialog() {
         dialogMessage.textContent = '';
+        elapsedTime.textContent = '';
         dialogRestartButton.classList.remove('hidden');
         dialogRestartButton.textContent = '';
         endGameDialog.close();
