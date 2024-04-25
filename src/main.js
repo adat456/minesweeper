@@ -1,5 +1,5 @@
 'use strict';
-import { mainMenu, startClassicButton, startCustomizedButton, restartButtons, returnButtons, game, customizationForm, validationErrMsgs, widthInput, lengthInput, minesInput, endGameDialog, levelInfo } from "./elements";
+import { mainMenu, startClassicButton, startCustomizedButton, restartButtons, returnButtons, instructions, game, customizationForm, validationErrMsgs, widthInput, lengthInput, minesInput, endGameDialog, levelInfo, exitInstructionsButton } from "./elements";
 import Board from "./Board";
 import BoardUI from "./BoardUI";
 import Timer from "./Timer";
@@ -13,9 +13,9 @@ const classicDifficultyProgression = [
     { width: 14, length: 14, mines: 40, level: 'Intermediate #3' },
     { width: 16, length: 30, mines: 99, level: 'Expert' },
 ];
-let gameActive = false; // responsible for switching between main menu and game
+let pageMode = 'main';
 let gameBoard = null;
-let mode = 'classic';
+let gameMode = 'classic';
 let classicDifficultyLevel = 0;
 let timer = new Timer();
 let width = 0;
@@ -60,20 +60,20 @@ export function updateInfo() {
 export function setOutcome(outcome) {
     timer.pause();
     BoardUI.showAllMines();
-    if (mode === 'classic' && outcome === 'win')
+    if (gameMode === 'classic' && outcome === 'win')
         classicDifficultyLevel++;
-    if (mode === 'classic' && classicDifficultyLevel > classicDifficultyProgression.length) {
-        BoardUI.renderEndGameDialog(mode, outcome, timer.getTimeString(), true);
+    if (gameMode === 'classic' && classicDifficultyLevel > classicDifficultyProgression.length) {
+        BoardUI.renderEndGameDialog(gameMode, outcome, timer.getTimeString(), true);
     }
     else {
-        BoardUI.renderEndGameDialog(mode, outcome, timer.getTimeString(), false);
+        BoardUI.renderEndGameDialog(gameMode, outcome, timer.getTimeString(), false);
     }
 }
 startClassicButton.addEventListener('click', () => {
-    mode = 'classic';
+    gameMode = 'classic';
     const boardDetails = classicDifficultyProgression[classicDifficultyLevel];
     gameBoard = new Board(boardDetails.width, boardDetails.length, boardDetails.mines);
-    gameActive = true;
+    pageMode = 'instructions';
     renderMain();
 });
 startCustomizedButton.addEventListener('click', () => {
@@ -83,44 +83,58 @@ startCustomizedButton.addEventListener('click', () => {
         renderCustomizedInputErrMsgs(errMsgs);
         return;
     }
-    mode = 'customized';
+    gameMode = 'customized';
     customizationForm === null || customizationForm === void 0 ? void 0 : customizationForm.reset();
     gameBoard = new Board(width, length, mines);
-    gameActive = true;
+    pageMode = 'instructions';
+    renderMain();
+});
+exitInstructionsButton.addEventListener('click', () => {
+    pageMode = 'game';
     renderMain();
 });
 restartButtons.forEach(button => button.addEventListener('click', () => {
-    if (mode === 'classic') {
+    if (gameMode === 'classic') {
         const boardDetails = classicDifficultyProgression[classicDifficultyLevel];
         gameBoard = new Board(boardDetails.width, boardDetails.length, boardDetails.mines);
     }
-    if (mode === 'customized')
+    if (gameMode === 'customized')
         gameBoard = new Board(width, length, mines);
+    BoardUI.resetEndGameDialog();
     endGameDialog.close();
     renderMain();
 }));
 returnButtons.forEach(button => button.addEventListener('click', () => {
-    if (mode === 'classic')
+    if (gameMode === 'classic')
         classicDifficultyLevel = 0;
     BoardUI.resetEndGameDialog();
-    gameActive = false;
+    pageMode = 'main';
     renderMain();
 }));
 function renderMain() {
     timer.reset();
     BoardUI.clearBoardAndInfo();
-    if (!gameActive) {
-        mainMenu.classList.remove('hidden');
-        game.classList.add('hidden');
-    }
-    else {
-        mainMenu.classList.add('hidden');
-        game.classList.remove('hidden');
-        if (gameBoard) {
-            BoardUI.renderInitialBoard(gameBoard.getLength(), gameBoard.getWidth(), gameBoard.getHandleMouseDownFunction());
-            levelInfo.textContent = mode === 'classic' ? `Level: ${classicDifficultyProgression[classicDifficultyLevel].level}` : '';
-            updateInfo();
-        }
+    switch (pageMode) {
+        case 'main':
+            mainMenu.classList.remove('hidden');
+            instructions.classList.add('hidden');
+            game.classList.add('hidden');
+            break;
+        case 'instructions':
+            mainMenu.classList.add('hidden');
+            instructions.classList.remove('hidden');
+            game.classList.add('hidden');
+            break;
+        case 'game':
+            mainMenu.classList.add('hidden');
+            instructions.classList.add('hidden');
+            game.classList.remove('hidden');
+            if (gameBoard) {
+                BoardUI.renderInitialBoard(gameBoard.getLength(), gameBoard.getWidth(), gameBoard.getHandleMouseDownFunction());
+                levelInfo.textContent = gameMode === 'classic' ? classicDifficultyProgression[classicDifficultyLevel].level : '';
+                updateInfo();
+            }
+            break;
     }
 }
 renderMain();

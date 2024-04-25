@@ -1,4 +1,4 @@
-import { board, flaggedMinesInfo, endGameDialog, dialogMessage, elapsedTime, dialogRestartButton } from './elements';
+import { board, flaggedMinesInfo, endGameDialog, dialogMessage, elapsedTime, dialogRestartButton, emoji } from './elements';
 
 type CellMouseDownHandler = (e: MouseEvent, x: number, y: number) => void;
 type Mode = 'classic' | 'customized';
@@ -25,7 +25,7 @@ export default class BoardUI {
     }
 
     static renderInfo(totalMines: number, flaggedMines: number) {
-        flaggedMinesInfo.textContent = `Flagged mines: ${flaggedMines}/${totalMines}`;
+        flaggedMinesInfo.textContent = `${flaggedMines}/${totalMines}`;
     }
 
     static showAllMines() {
@@ -39,6 +39,7 @@ export default class BoardUI {
     }
 
     static renderEndGameDialog(mode: Mode, outcome: Outcome, time: string, classicEnd: boolean) {
+        if (outcome === 'lose') emoji.classList.add('dead');
         dialogMessage.textContent = 
             outcome === 'lose' ? 'You exploded...' :
                 classicEnd === false ? 'You survived!' : 'You made it through all the levels. Congrats!';
@@ -54,6 +55,7 @@ export default class BoardUI {
     }
 
     static resetEndGameDialog() {
+        emoji.classList.remove('dead');
         dialogMessage.textContent = '';
         elapsedTime.textContent = '';
         dialogRestartButton.classList.remove('hidden');

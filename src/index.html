@@ -35,19 +35,44 @@
         <button id="start-customized" class="start-game" type="button">Start game</button>
       </div>
     </section>
+    <section id="instructions" class="hidden">
+      <h2>Instructions</h2>
+      <p>You will be presented with a grid of squares. Most of the squares will be safe,but some will conceal deadly mines.</p>
+      <p>If you click on a safe square, the number of adjacent mines will be revealed (anywhere from 1 to 8). When there are no adjacent mines, surrounding squares will automatically be revealed until mines are encountered. But if you click on a square containing a hidden mine--boom!</p>
+      <p>The game ends when you have either accidentally discovered a mine, or cleared all safe squares.</p>
+      <h2>Tips + Other Info</h2>
+      <ul>
+        <li>The first click is always safe. There will never be a mine hiding under the first cell you choose.</li>
+        <li>Not loving the current grid? Click on the happy emoji above the board to generate new mine placements and start over.</li>
+        <li>Right-click to toggle between three states: uncleared, flagged (highly suspicious for mine activity), and question mark (somewhat suspicious). Although these states have no bearing on the final outcome, they can help you deduce which cells have mines.</li>
+        <li>If you use the flag feature, keep an eye on the total number of flagged mines. This can help you assess risk and track your progress.</li>
+        <li>Watch the time! The time only starts after the first click. The faster you can clear a grid, the better!</li>
+        <li>For more information and to view basic patterns, visit this <a href="https://minesweepergame.com/strategy/how-to-play-minesweeper.php" target="_blank">minesweeper guide</a>.</li>
+      </ul>
+      <button id="exit-instructions" class="start-game">Start</button>
+    </section>
     <section id="game" class="hidden">
-      <div id="board"></div>
-      <div id="settings">
+
+      <div id="board-background">
         <div id="info">
+          <div id="flagged-mines-container">
+            <div id="mine-svg-container">
+              <img src="icons/bomb.svg" alt="Flagged mines">
+            </div>
+            <p id="flagged-mines"></p>
+          </div>
+          <button id="emoji" class="restart"></button>
+          <div id="timer">
+            <span id="minute">00</span>:<span id="second">00</span>
+          </div>
+        </div>
+        <div id="board"></div>
+        <div id="settings">
           <p id="level"></p>
-          <p id="flagged-mines"></p>
+          <button class="return">Quit</button>
         </div>
-        <div id="timer">
-          <span id="hour">00</span>:<span id="minute">00</span>:<span id="second">00</span>
-        </div>
-        <button class="restart start-game">Regenerate</button>
-        <button class="return">Return to main menu</button>
       </div>
+      
       <dialog id="end-game">
         <div>
           <p id="end-game-msg"></p>

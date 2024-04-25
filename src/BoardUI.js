@@ -1,4 +1,4 @@
-import { board, flaggedMinesInfo, endGameDialog, dialogMessage, elapsedTime, dialogRestartButton } from './elements';
+import { board, flaggedMinesInfo, endGameDialog, dialogMessage, elapsedTime, dialogRestartButton, emoji } from './elements';
 export default class BoardUI {
     static renderInitialBoard(length, width, mouseDownHandler) {
         for (let x = 0; x < length; x++) {
@@ -18,7 +18,7 @@ export default class BoardUI {
         }
     }
     static renderInfo(totalMines, flaggedMines) {
-        flaggedMinesInfo.textContent = `Flagged mines: ${flaggedMines}/${totalMines}`;
+        flaggedMinesInfo.textContent = `${flaggedMines}/${totalMines}`;
     }
     static showAllMines() {
         const mineCells = Array.from(document.querySelectorAll(`[data-type = 'mine']`));
@@ -30,6 +30,8 @@ export default class BoardUI {
         flaggedMinesInfo.textContent = '';
     }
     static renderEndGameDialog(mode, outcome, time, classicEnd) {
+        if (outcome === 'lose')
+            emoji.classList.add('dead');
         dialogMessage.textContent =
             outcome === 'lose' ? 'You exploded...' :
                 classicEnd === false ? 'You survived!' : 'You made it through all the levels. Congrats!';
@@ -45,6 +47,7 @@ export default class BoardUI {
         endGameDialog.showModal();
     }
     static resetEndGameDialog() {
+        emoji.classList.remove('dead');
         dialogMessage.textContent = '';
         elapsedTime.textContent = '';
         dialogRestartButton.classList.remove('hidden');

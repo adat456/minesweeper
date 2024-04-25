@@ -442,6 +442,10 @@ button, .start-game {
   padding: 2rem;
 }
 
+.hidden {
+  display: none;
+}
+
 #minesweeper #main-menu.hidden {
   display: none;
 }
@@ -516,7 +520,45 @@ button, .start-game {
   margin-top: 1rem;
 }
 
+/* instruction styles */
+
+#instructions h2 {
+  margin-bottom: 1.5rem;
+}
+
+#instructions p {
+  margin-bottom: 1.5rem;
+}
+
+#instructions h3 {
+  font-size: 2.2rem;
+}
+
+#instructions ul {
+  padding: 0 2rem;
+}
+
+#instructions li {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+#instructions a {
+  font-size: 1.8rem;
+}
+
+#instructions button {
+  padding: 1rem 1.8rem;
+  margin: 2rem auto;
+}
+
 /* game styles */
+
+#board-background {
+  width: 100%;
+  background-color: #ededed;
+  padding: 2rem 0;
+}
 
 #board {
   max-width: fit-content;
@@ -589,18 +631,59 @@ button[data-status="bomb-reveal"] {
   background-size: 1.5rem 1.5rem;
 }
 
-#settings {
-  max-width: 600px;
-  margin: 0 auto;
-  margin-top: 1.5rem;
+#info, #flagged-mines-container, #settings {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  gap: 4rem;
 }
 
 #info {
-  margin-right: auto;
+  margin-bottom: 0.5rem;
+}
+
+#flagged-mines-container {
+  gap: 0.2rem;
+}
+
+#mine-svg-container {
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.3rem;
+}
+
+img[src="bomb.svg"] {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+#emoji {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  background: url("icons/alive.svg") no-repeat center;
+  background-size: 2.5rem 2.5rem;
+}
+
+#emoji.dead {
+  background: url("icons/dead.svg") no-repeat center;
+  background-size: 2.5rem 2.5rem;
+}
+
+#timer span {
+  font-size: 1.8rem;
+}
+
+#settings {
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+#settings .return {
+  background-color: #ededed;
+  font-size: 1.8rem;
+  font-weight: normal;
 }
 
 dialog {
