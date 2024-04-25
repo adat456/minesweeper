@@ -43,7 +43,7 @@ export default class Board {
         for (const coordPair of this.#mineCoords) {
             const cell = document.querySelector(`[data-x = '${coordPair[0]}'][data-y = '${coordPair[1]}']`) as HTMLButtonElement;
             cell.setAttribute('data-type', 'mine');
-            // cell.innerHTML = 'B'; // delete
+            cell.innerHTML = 'B'; // delete
         }
     }
 
@@ -69,8 +69,8 @@ export default class Board {
     }
 
     #areAllNotMineCellsChecked(): boolean {
-        const notMineCells: NodeListOf<HTMLButtonElement> = document.querySelectorAll(`[data-type = 'notmine']`);
-        return Array.from(notMineCells).every(cell => cell.getAttribute('data-status') === 'checked');
+        const notMineCells: HTMLButtonElement[] = Array.from(document.querySelectorAll(`[data-type = 'notmine']`));
+        return notMineCells.every(cell => cell.getAttribute('data-status') === 'checked');
     }
 
     // minor UI manipulation
@@ -90,6 +90,7 @@ export default class Board {
         // base case
         if (numAdjacentMines > 0) {
             currentCell.innerHTML = String(numAdjacentMines);
+            currentCell.setAttribute('data-num-adj-mines', String(numAdjacentMines));
         } else {
             for (let i = 0; i < adjacentCells.length; i++) {
                 let cell = adjacentCells[i];

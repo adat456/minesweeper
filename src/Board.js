@@ -58,7 +58,7 @@ _Board_width = new WeakMap(), _Board_length = new WeakMap(), _Board_numMines = n
     for (const coordPair of __classPrivateFieldGet(this, _Board_mineCoords, "f")) {
         const cell = document.querySelector(`[data-x = '${coordPair[0]}'][data-y = '${coordPair[1]}']`);
         cell.setAttribute('data-type', 'mine');
-        // cell.innerHTML = 'B'; // delete
+        cell.innerHTML = 'B'; // delete
     }
 }, _Board_findAdjacentCells = function _Board_findAdjacentCells(x, y) {
     // returns cells surrounding the current coods, as long as each cell is within bounds and has not yet been checked
@@ -82,8 +82,8 @@ _Board_width = new WeakMap(), _Board_length = new WeakMap(), _Board_numMines = n
     }
     return adjacentCells;
 }, _Board_areAllNotMineCellsChecked = function _Board_areAllNotMineCellsChecked() {
-    const notMineCells = document.querySelectorAll(`[data-type = 'notmine']`);
-    return Array.from(notMineCells).every(cell => cell.getAttribute('data-status') === 'checked');
+    const notMineCells = Array.from(document.querySelectorAll(`[data-type = 'notmine']`));
+    return notMineCells.every(cell => cell.getAttribute('data-status') === 'checked');
 }, _Board_checkAdjacentCells = function _Board_checkAdjacentCells(x, y) {
     const currentCell = document.querySelector(`[data-x = '${x}'][data-y = '${y}']`);
     currentCell.setAttribute('data-status', 'checked');
@@ -98,6 +98,7 @@ _Board_width = new WeakMap(), _Board_length = new WeakMap(), _Board_numMines = n
     // base case
     if (numAdjacentMines > 0) {
         currentCell.innerHTML = String(numAdjacentMines);
+        currentCell.setAttribute('data-num-adj-mines', String(numAdjacentMines));
     }
     else {
         for (let i = 0; i < adjacentCells.length; i++) {

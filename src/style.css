@@ -536,17 +536,57 @@ button, .start-game {
 }
 
 button[data-status="checked"] {
-  background-color: white;
+  color: black;
+  font-weight: bold;
+  background-color: #fff7e4;
+}
+
+/* https://lospec.com/palette-list/vanilla-milkshake */
+button[data-num-adj-mines="1"] {
+  background-color: #ffe6c6;
+}
+
+button[data-num-adj-mines="2"] {
+  background-color: #ffc384;
+}
+
+button[data-num-adj-mines="3"] {
+  background-color: #dea38b;
+}
+
+button[data-num-adj-mines="4"] {
+  background-color: #e9f59d;
+}
+
+button[data-num-adj-mines="5"] {
+  background-color: #b0eb93;
+}
+
+button[data-num-adj-mines="6"] {
+  background-color: #accce4;
+}
+
+button[data-num-adj-mines="7"] {
+  background-color: #b0a9e4;
+}
+
+button[data-num-adj-mines="8"] {
+  background-color: #feaae4;
 }
 
 button[data-status="flag"] {
   background: url("icons/flag.svg") no-repeat center;
-  background-size: 15px 15px;
+  background-size: 1.5rem 1.5rem;
 }
 
 button[data-status="question"] {
   background: url("icons/question.svg") no-repeat center;
-  background-size: 15px 15px;
+  background-size: 1.5rem 1.5rem;
+}
+
+button[data-status="bomb-reveal"] {
+  background: url("icons/bomb.svg") no-repeat center;
+  background-size: 1.5rem 1.5rem;
 }
 
 #settings {
