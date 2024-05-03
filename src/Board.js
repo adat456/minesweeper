@@ -58,7 +58,6 @@ _Board_width = new WeakMap(), _Board_length = new WeakMap(), _Board_numMines = n
     for (const coordPair of __classPrivateFieldGet(this, _Board_mineCoords, "f")) {
         const cell = document.querySelector(`[data-x = '${coordPair[0]}'][data-y = '${coordPair[1]}']`);
         cell.setAttribute('data-type', 'mine');
-        cell.innerHTML = 'B'; // delete
     }
 }, _Board_findAdjacentCells = function _Board_findAdjacentCells(x, y) {
     // returns cells surrounding the current coods, as long as each cell is within bounds and has not yet been checked
