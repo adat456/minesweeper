@@ -43,7 +43,6 @@ export default class Board {
         for (const coordPair of this.#mineCoords) {
             const cell = document.querySelector(`[data-x = '${coordPair[0]}'][data-y = '${coordPair[1]}']`) as HTMLButtonElement;
             cell.setAttribute('data-type', 'mine');
-            cell.innerHTML = 'B'; // delete
         }
     }
 
